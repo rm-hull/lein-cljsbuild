@@ -20,9 +20,9 @@
 
 (defn- run-local-project [project crossover-path builds requires form]
   (leval/eval-in-project (subproject/make-subproject project crossover-path builds)
-    ; Without an explicit exit, the in-project subprocess seems to just hang for
-    ; around 30 seconds before exiting.  I don't fully understand why...
-    `(~form (System/exit 0))
+    ; Hack to harshly exit the JVM should no longer be needed with lein 2.1.0-SNAPSHOT:
+    ; https://github.com/technomancy/leiningen/commit/4f2bc328d73ab37d14c06ae22a2045252d312f55#leiningen-core/src/leiningen/core/eval.clj
+    form
     requires))
 
 (defn- run-compiler [project {:keys [crossover-path crossovers builds]} build-ids watch?]
