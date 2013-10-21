@@ -1,19 +1,18 @@
-(defproject rm-hull/cljsbuild "0.3.1-SNAPSHOT"
+(defproject cljsbuild "0.3.4"
   :description "ClojureScript Autobuilder"
-  :url "http://github.com/rm_hull/lein-cljsbuild"
+  :url "http://github.com/emezeske/lein-cljsbuild"
   :license
     {:name "Eclipse Public License - v 1.0"
      :url "http://www.eclipse.org/legal/epl-v10.html"
      :distribution :repo}
   :dependencies
     [[org.clojure/clojure "1.5.1"]
-     [org.clojure/clojurescript "0.0-1586"
+     [org.clojure/clojurescript "0.0-1934"
        :exclusions [org.apache.ant/ant]]
-     ; Ugly workaround for http://dev.clojure.org/jira/browse/CLJS-418
-     [org.clojure/google-closure-library-third-party "0.0-2029"]
-     [fs "1.3.3"]
+     [fs "1.1.2"]
      [clj-stacktrace "0.2.5"]]
+  :aot [cljsbuild.test]
   :profiles {
     :dev {
-      :dependencies [[midje "1.4.0"]]
+      :dependencies [[midje "1.5.1"]]
       :plugins [[lein-midje "2.0.4"]]}})

@@ -1,10 +1,12 @@
-(defproject cljsbuild-example-advanced "0.3.0"
+(defproject cljsbuild-example-advanced "0.3.4"
   :description "An advanced example of how to use lein-cljsbuild"
   :source-paths ["src-clj"]
-  :dependencies [[org.clojure/clojure "1.4.0"]
+  :dependencies [[org.clojure/clojure "1.5.1"]
+                 [org.clojure/clojurescript "0.0-1859"
+                  :exclusions [org.apache.ant/ant]]
                  [compojure "1.0.4"]
                  [hiccup "1.0.0"]]
-  :plugins [[lein-cljsbuild "0.3.0"]
+  :plugins [[lein-cljsbuild "0.3.4"]
             [lein-ring "0.7.0"]]
   ; Enable the lein hooks for: clean, compile, test, and jar.
   :hooks [leiningen.cljsbuild]
@@ -67,7 +69,7 @@
       ; be run via PhantomJS.  See the phantom/unit-test.js file
       ; for details on how it's run.
       :test
-      {:source-paths ["test-cljs"]
+      {:source-paths ["src-cljs" "test-cljs"]
        :compiler {:output-to "resources/private/js/unit-test.js"
                   :optimizations :whitespace
                   :pretty-print true}}}}

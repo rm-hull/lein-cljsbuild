@@ -1,10 +1,25 @@
 (ns leiningen.cljsbuild.subproject
   "Utilities for running cljsbuild in a subproject"
   (:require
+    [clojure.java.io :refer (resource)]
     [clojure.string :as string]))
 
-(def cljsbuild-version "0.3.0")
-(def required-clojure-version "1.4.0")
+(def cljsbuild-version
+  (let [[_ coords version]
+        (-> (or (resource "META-INF/leiningen/lein-cljsbuild/lein-cljsbuild/project.clj")
+                ; this should only ever come into play when testing cljsbuild itself
+                "project.clj")
+            slurp
+            read-string)]
+    (assert (= coords 'lein-cljsbuild)
+            (str "Something very wrong, could not find lein-cljsbuild's project.clj, actually found: "
+                 coords))
+    (assert (string? version)
+            (str "Something went wrong, version of lein-cljsbuild is not a string: "
+                 version))
+    version))
+
+(def required-clojure-version "1.5.1")
 
 (def cljsbuild-dependencies
   [['cljsbuild cljsbuild-version]
@@ -38,6 +53,12 @@
   (let [project (dependency-map project-dependencies)
         cljsbuild (dependency-map cljsbuild-dependencies)]
     (check-clojure-version project)
+    (when-not ('org.clojure/clojurescript project)
+      (println "\033[33mWARNING: It appears your project does not contain a ClojureScript"
+               "dependency. One will be provided for you by lein-cljsbuild, but it"
+               "is strongly recommended that you add your own.  You can find a list"
+               "of all ClojureScript releases here:")
+      (println "http://search.maven.org/#search|ga|1|g%3A%22org.clojure%22%20AND%20a%3A%22clojurescript%22\033[0m"))
     (map (fn [[k v]] (vec (cons k v)))
       (merge cljsbuild project))))
 

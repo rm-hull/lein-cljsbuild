@@ -1,8 +1,45 @@
 # Release Notes for lein-cljsbuild
 
-## 0.3.1-SNAPSHOT
+## [0.3.4](https://github.com/emezeske/lein-cljsbuild/issues?milestone=31&state=closed)
 
-1. Reverted point 5 in 0.3.0 release: Underlying cause should be fixed in leiningen 2.1.0-SNAPSHOT
+* Added new `sample` subtask that emits the contents of the `sample.project.clj`
+  file detailing cljsbuild's options (gh-232)
+* Hard compilation failures now properly fail the broader Leiningen
+  invocation (gh-234)
+* Any non-string values in a `:test-command` vector now properly cause a failure
+  (gh-243)
+* The `:output-wrapper` ClojureScript compiler option is now defaulted to `true`
+  if the `:optimizations` option is set to `:advanced` (gh-201)
+* Fixed an issue where case-sensitivity of the drive letter on windows prevented
+  the proper relativization of paths to Clojure files containing macros to be
+  (re)loaded (gh-240)
+* Test runs now properly fail if any `:test-commands` vector contains any
+  non-string values (gh-243)
+
+## [0.3.3](https://github.com/emezeske/lein-cljsbuild/issues?milestone=28&state=closed)
+
+1. Changed to use upstream ClojureScript version 0.0-1859.
+2. cljsbuild now warns if you have not explicitly specified a ClojureScript
+   dependency in your project. (gh-224)
+3. The file scanning associated with `cljsbuild auto` has been improved
+   significantly, and should now represent a negligible CPU load. (gh-219)
+4. Under `cljsbuild auto`, Clojure files are now only reloaded if they define
+   macros. (gh-210)
+5. A sane error message is now emitted if you attempt to run a nonexistent
+   cljsbuild task (gh-215)
+6. Various documentation and example project tweaks.
+
+## 0.3.2
+
+1. Changed to use upstream ClojureScript version 0.0-1806.
+
+## 0.3.1
+
+1. Changed to use upstream ClojureScript version 0.0-1803.
+2. Updated the Clojure version used in the plugin to 1.5.1.
+3. This plugin version requires Leiningen version 2.1.2 or higher.
+4. Fix `lein cljsbuild test` so that it exits quickly (i.e. without a 30-second delay).
+5. Hide the Clojure stacktrace when ClojureScript unit tests fail.
 
 ## 0.3.0
 

@@ -7,10 +7,14 @@
 (defproject org.example/sample "1.0.0-SNAPSHOT"
   ; Your project must use Clojure 1.4 or above to support
   ; ClojureScript compilation.
-  :dependencies [[org.clojure/clojure "1.4.0"]]
+  :dependencies [[org.clojure/clojure "1.5.1"]
+                 ; Your project should specify its own dependency on
+                 ; ClojureScript
+                 [org.clojure/clojurescript "0.0-1859"
+                  :exclusions [org.apache.ant/ant]]]
   ; Your project should plugin-depend on lein-cljsbuild, to ensure that
   ; the right version of the plugin is installed.
-  :plugins [[lein-cljsbuild "0.3.0"]]
+  :plugins [[lein-cljsbuild "0.3.2"]]
   ; The standard Leiningen :source-paths option is used by lein-cljsbuild
   ; to determine the source directory from which crossover files will
   ; be copied.  Leiningen defaults to ["src"].
@@ -103,6 +107,9 @@
           ; compilation.  Must be unique among all :builds. Defaults to
           ; "target/cljsbuild-compiler-X" (where X is a unique integer).
           :output-dir "target/my-compiler-output-"
+          ; Wrap the JavaScript output in (function(){...};)() to avoid clobbering globals.
+          ; Defaults to true when using advanced compilation, false otherwise.
+          :output-wrapper false
           ; Configure externs files for external libraries.
           ; Defaults to the empty vector [].
           ; For this entry, and those below, you can find a very good explanation at:
@@ -112,7 +119,7 @@
           ; watched and a rebuild will occur if they are modified.
           ; Defaults to the empty vector [].
           :libs ["closure/library/third_party/closure"]
-          ; Adds dependencies on foreign libraries.
+          ; Adds dependencies on foreign libraries. Be sure that the url returns a HTTP Code 200
           ; Defaults to the empty vector [].
           :foreign-libs [{:file "http://example.com/remote.js"
                            :provides  ["my.example"]}]}}}})

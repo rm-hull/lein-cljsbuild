@@ -14,15 +14,26 @@
     [leiningen.jar :as ljar]
     [leiningen.test :as ltest]
     [leiningen.trampoline :as ltrampoline]
-    [robert.hooke :as hooke]))
+    [robert.hooke :as hooke]
+    [clojure.java.io :as io]))
 
 (def ^:private repl-output-path "repl")
 
 (defn- run-local-project [project crossover-path builds requires form]
   (leval/eval-in-project (subproject/make-subproject project crossover-path builds)
-    ; Hack to harshly exit the JVM should no longer be needed with lein 2.1.0-SNAPSHOT:
-    ; https://github.com/technomancy/leiningen/commit/4f2bc328d73ab37d14c06ae22a2045252d312f55#leiningen-core/src/leiningen/core/eval.clj
-    form
+    ; Without an explicit exit, the in-project subprocess seems to just hang for
+    ; around 30 seconds before exiting.  I don't fully understand why...
+    `(try
+       (do
+         ~form
+         (System/exit 0))
+       (catch cljsbuild.test.TestsFailedException e#
+         ; Do not print stack trace on test failure
+         (System/exit 1))
+       (catch Exception e#
+         (do
+           (.printStackTrace e#)
+           (System/exit 1))))
     requires))
 
 (defn- run-compiler [project {:keys [crossover-path crossovers builds]} build-ids watch?]
@@ -82,9 +93,17 @@
                            (println "Running ClojureScript test:" (first args))
                            [(test-commands (first args))]))
         parsed-tests (map config/parse-shell-command selected-tests)]
-  (run-local-project project crossover-path builds
-    '(require 'cljsbuild.test)
-    `(cljsbuild.test/run-tests '~parsed-tests))))
+    (doseq [[_ test-command] test-commands]
+      (when-not (every? string? test-command)
+        (binding [*out* *err*]
+          (println "Invalid :test-command, contains non-string value:" test-command)
+          (lmain/abort))))
+    (when (empty? (:shell (first parsed-tests)))
+      (println (str "Could not locate test command " (first args) "."))
+      (lmain/abort))
+    (run-local-project project crossover-path builds
+                       '(require 'cljsbuild.test)
+                       `(cljsbuild.test/run-tests '~parsed-tests))))
 
 (defmacro require-trampoline [& forms]
   `(if ltrampoline/*trampoline?*
@@ -172,10 +191,15 @@
       '(require 'cljsbuild.repl.rhino)
       `(cljsbuild.repl.rhino/run-repl-rhino))))
 
+(defn- sample
+  "Display a sample project.clj."
+  []
+  (-> (io/resource "sample.project.clj") slurp println))
+
 (defn cljsbuild
   "Run the cljsbuild plugin."
-  {:help-arglists '([once auto clean test repl-listen repl-launch repl-rhino])
-   :subtasks [#'once #'auto #'clean #'test #'repl-listen #'repl-launch #'repl-rhino]}
+  {:help-arglists '([once auto clean test repl-listen repl-launch repl-rhino sample])
+   :subtasks [#'once #'auto #'clean #'test #'repl-listen #'repl-launch #'repl-rhino #'sample]}
   ([project]
     (println
       (lhelp/help-for "cljsbuild"))
@@ -190,6 +214,7 @@
         "repl-listen" (repl-listen project options)
         "repl-launch" (repl-launch project options args)
         "repl-rhino" (repl-rhino project options)
+        "sample" (sample)
         (do
           (println
             "Subtask" (str \" subtask \") "not found."

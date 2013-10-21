@@ -1,10 +1,12 @@
-(defproject cljsbuild-example-simple "0.3.0"
+(defproject cljsbuild-example-simple "0.3.4"
   :description "A simple example of how to use lein-cljsbuild"
   :source-paths ["src-clj"]
-  :dependencies [[org.clojure/clojure "1.4.0"]
+  :dependencies [[org.clojure/clojure "1.5.1"]
+                 [org.clojure/clojurescript "0.0-1859"
+                  :exclusions [org.apache.ant/ant]]
                  [compojure "1.0.4"]
                  [hiccup "1.0.0"]]
-  :plugins [[lein-cljsbuild "0.3.0"]
+  :plugins [[lein-cljsbuild "0.3.4"]
             [lein-ring "0.7.0"]]
   :cljsbuild {
     :builds [{:source-paths ["src-cljs"]
